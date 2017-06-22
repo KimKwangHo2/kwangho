@@ -169,11 +169,11 @@ enum POOL_Number
 	//	POOL_EnemyBullet = 0,
 	POOL_EnemyBullet = 0,
 	POOL_Enemy,
+	POOL_Enemy1,
 	POOL_EnemyExplosion,
 
 	POOL_PlayerBullet,
 	POOL_Player,
-
 
 	POOL_Max,
 };

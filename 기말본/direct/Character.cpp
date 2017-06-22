@@ -245,8 +245,10 @@ VOID Character::updateAnimation(VOID)
 // 시간이 모두 지나가면, 가장마지막 (모션-1)에서 멈춘다.
 VOID Character::updateMotion(VOID)
 {
-	if ( _bMot_play == FALSE)
+	if (_bMot_play == FALSE)
+	{
 		return;
+	}
 
 
 	if ( _bMot_first_play == TRUE)
@@ -261,23 +263,31 @@ VOID Character::updateMotion(VOID)
 	D3DXVECTOR3 vOut;
 
 	_fMot_cnt += t;
-	while ( _fMot_cnt > _fMot_time )
+
+	
+	while (_fMot_cnt > _fMot_time)
 	{
 		_fMot_cnt -= _fMot_time;
 		_uMot_num++;
 
-		if ( _uMot_num +1 >= _vMotion.size() )
+		if (_uMot_num + 1 >= _vMotion.size())
 		{
+			//_uMot_num = 0;
 			_uMot_num--;
 			Event(MOT_End);
 			_fMot_cnt = _fMot_time;
 			_bMot_play = FALSE;
 		}
 		else
-			_fMot_time = _vMotion[_uMot_num+1]->Time - _vMotion[_uMot_num]->Time ;
+		{
+			_fMot_time = _vMotion[_uMot_num + 1]->Time - _vMotion[_uMot_num]->Time;
+			_uMot_num = 0;
+			_uMot_num++;
+		}
 
 
 	}
+	
 
 
 	D3DXVec3Lerp( &vOut,

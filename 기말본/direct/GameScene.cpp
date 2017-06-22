@@ -14,6 +14,7 @@ GameScene::GameScene()
 {
 	_Bullet_texture		= NULL;
 	_Enemy_texture		= NULL;
+	_Enemy_texture1		= NULL;
 	ZeroMemory(_Player_texture, sizeof(_Player_texture));
 
 	_Enemy2				= NULL;
@@ -33,6 +34,7 @@ VOID GameScene::Initialize(VOID)
 	_pPool->reservePool(POOL_Max);
 	initEnemyBullet();
 	initEnemy();
+	initEnemy1();
 	initEnemy_Explosion();
 	initBullet();
 	initPlayer();
@@ -49,6 +51,7 @@ VOID GameScene::Update(VOID)
 {
 	updateKey();		// 키입력
 	updateCollision();	// 총알 충돌체크
+	updateCollision1();
 	updateBullet();		// 총알이동
 
 	UpdateBarrage();
@@ -99,6 +102,9 @@ VOID GameScene::Release(VOID)
 
 	if (_Enemy_texture)
 		_Enemy_texture->Release();
+
+	if (_Enemy_texture1)
+		_Enemy_texture1->Release();
 
 	if (_EnemyExplosion_texture)
 		_EnemyExplosion_texture->Release();
@@ -219,7 +225,8 @@ VOID GameScene::initEnemyBullet(VOID)
 
 	Property EnemyProperty;
 	ZeroMemory(&EnemyProperty, sizeof(Property));
-	EnemyProperty.HealthPoint	= 200.0f;
+	EnemyProperty.HealthPoint	= 1.0f;
+	EnemyProperty.AttackDamage = 1.0f;
 	EnemyProperty.ALive			= TRUE;
 
 
@@ -357,11 +364,11 @@ VOID GameScene::initEnemy(VOID)
 
 
 
-	// 1번째 적넣기
-	Character* pEnemy1 = NULL;
-	pEnemy1 = _pPool->New(POOL_Enemy);
-	pEnemy1->stopMotion();
-	pEnemy1->setPosition( &D3DXVECTOR3(rand(),rand(), rand()) );
+	//// 1번째 적넣기
+	//Character* pEnemy1 = NULL;
+	//pEnemy1 = _pPool->New(POOL_Enemy);
+	//pEnemy1->stopMotion();
+	//pEnemy1->setPosition( &D3DXVECTOR3(rand(),rand(), rand()) );
 
 
 
@@ -371,23 +378,129 @@ VOID GameScene::initEnemy(VOID)
 	pEnemy2->playMotion();
 	pEnemy2->setPosition( &D3DXVECTOR3(434.0f, 64.0f, .0f) );	
 
-	// 2번째 적넣기
-	Character* pEnemy3 = NULL;
-	pEnemy3 = _pPool->New(POOL_Enemy);
-	pEnemy3->stopMotion();
-	pEnemy3->setPosition(&D3DXVECTOR3(rand()%500, rand()%200, .0f));
+	//// 2번째 적넣기
+	//Character* pEnemy3 = NULL;
+	//pEnemy3 = _pPool->New(POOL_Enemy);
+	//pEnemy3->stopMotion();
+	//pEnemy3->setPosition(&D3DXVECTOR3(rand()%500, rand()%200, .0f));
 
-	Character* pEnemy4 = NULL;
-	pEnemy4 = _pPool->New(POOL_Enemy);
-	pEnemy4->stopMotion();
-	pEnemy4->setPosition(&D3DXVECTOR3(rand() % 500, rand() % 1000, .0f));
+	//Character* pEnemy4 = NULL;
+	//pEnemy4 = _pPool->New(POOL_Enemy);
+	//pEnemy4->stopMotion();
+	//pEnemy4->setPosition(&D3DXVECTOR3(rand() % 500, rand() % 1000, .0f));
 
 
 
 	_Enemy2 = pEnemy2;
-	_Enemy3 = pEnemy3;
 	OnBarrage(0);
 
+
+}
+
+VOID GameScene::initEnemy1(VOID)
+{
+	// 첫번째 적넣기
+	Character* pEnemy = NULL;
+	pEnemy = new Character;
+
+	ImageVec2 vEnemyImage;
+	vEnemyImage.resize(1);
+
+	Image* EnemyImage = new Image;
+	ZeroMemory(EnemyImage, sizeof(Image_data));
+	EnemyImage->Source.left = 0;
+	EnemyImage->Source.top = 0;
+	EnemyImage->Source.right = 10;
+	EnemyImage->Source.bottom = 10;
+	EnemyImage->Time = 1.0f;
+
+
+	EnemyImage->Position.x =0.0f;
+	EnemyImage->Position.y = 0.0f;
+
+
+
+	Property EnemyProperty;
+	ZeroMemory(&EnemyProperty, sizeof(Property));
+	EnemyProperty.HealthPoint = 200.0f;
+	EnemyProperty.ALive = TRUE;
+
+
+	// 이미지 부르기
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"enemybule.png",
+		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
+		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &EnemyImage->Texture);
+	_Enemy_texture = EnemyImage->Texture;
+
+	// 데이터 적용
+	vEnemyImage[0].push_back(EnemyImage);
+	pEnemy->setAnimation(&vEnemyImage);
+	pEnemy->setProperty(&EnemyProperty);
+
+
+	// 충돌 데이터 넣기
+	BoundBoxVec vBound;
+	BoundingBox* pBox = NULL;
+
+	pBox = new BoundingBox;
+	pBox->LT.x = 0.0f;
+	pBox->LT.y = 0.0f;
+	pBox->LT.z = .0f;
+	pBox->RB.x = 10.0f;
+	pBox->RB.y = 10.0f;
+	vBound.push_back(pBox);
+	pEnemy->setBoundingBox(&vBound);
+
+	pEnemy->setPosition(&D3DXVECTOR3(0.0f, 0.0f, .0f));
+
+
+
+	_pPool->pushPool(pEnemy, 8);
+
+
+
+	// 1번째 적넣기
+	Character* pEnemy1 = NULL;
+	pEnemy1 = _pPool->New(POOL_Enemy1);
+	pEnemy1->stopMotion();
+	pEnemy1->setPosition(&D3DXVECTOR3(350.0f, 400.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy2 = NULL;
+	pEnemy2 = _pPool->New(POOL_Enemy1);
+	pEnemy2->stopMotion();
+	pEnemy2->setPosition(&D3DXVECTOR3(250.0f, 110.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy3 = NULL;
+	pEnemy3 = _pPool->New(POOL_Enemy1);
+	pEnemy3->stopMotion();
+	pEnemy3->setPosition(&D3DXVECTOR3(50.0f, 200.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy4 = NULL;
+	pEnemy4 = _pPool->New(POOL_Enemy1);
+	pEnemy4->stopMotion();
+	pEnemy4->setPosition(&D3DXVECTOR3(150.0f, 600.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy5 = NULL;
+	pEnemy5 = _pPool->New(POOL_Enemy1);
+	pEnemy5->stopMotion();
+	pEnemy5->setPosition(&D3DXVECTOR3(450.0f, 500.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy6 = NULL;
+	pEnemy6 = _pPool->New(POOL_Enemy1);
+	pEnemy6->stopMotion();
+	pEnemy6->setPosition(&D3DXVECTOR3(0.0f, 100.0f, .0f));
+
+	// 1번째 적넣기
+	Character* pEnemy7 = NULL;
+	pEnemy7 = _pPool->New(POOL_Enemy1);
+	pEnemy7->stopMotion();
+	pEnemy7->setPosition(&D3DXVECTOR3(350.0f, 300.0f, .0f));
 
 }
 
@@ -462,6 +575,9 @@ VOID GameScene::initEnemy_Explosion(VOID)
 // 하는일 : Player리소스를 읽어들인다.
 VOID GameScene::initPlayer(VOID)
 {
+	Character* pPlayer = NULL;
+	pPlayer = new Character;
+
 	ImageVec2 vPlayerImage;
 	//vPlayerImage.resize(1);
 	vPlayerImage.resize(4);
@@ -470,14 +586,14 @@ VOID GameScene::initPlayer(VOID)
 	Image* pPlayerImage = NULL;
 	ZeroMemory(&PlayerImage, sizeof(Image_data));
 
-	PlayerImage.Source.left		= 0;
-	PlayerImage.Source.top		= 0;
-	PlayerImage.Source.right	= 50;
-	PlayerImage.Source.bottom	= 50;
-	PlayerImage.Time			= .20f;
+	PlayerImage.Source.left = 0;
+	PlayerImage.Source.top = 4;
+	PlayerImage.Source.right = 20;
+	PlayerImage.Source.bottom = 30;
+	PlayerImage.Time = .20f;
 
-	PlayerImage.Position.x		= -20.0f;
-	PlayerImage.Position.y		= -24.5f;
+	PlayerImage.Position.x = -20.0f;
+	PlayerImage.Position.y = -24.5f;
 
 
 
@@ -486,41 +602,41 @@ VOID GameScene::initPlayer(VOID)
 
 	// 이미지 부르기
 	//D3DXCreateTextureFromFileExW( _pd3dDevice, L"nemo80_160.png", 
-	D3DXCreateTextureFromFileExW( _pd3dDevice, L"player.png", 
-		D3DX_DEFAULT_NONPOW2 , D3DX_DEFAULT_NONPOW2 ,
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"player.png",
+		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture); 
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture);
 	_Player_texture[0] = PlayerImage.Texture;
 
 	// 왼
-	
+
 	pPlayerImage = new Image;
 	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 95 ;
-	pPlayerImage->Source.right = 145;
+	pPlayerImage->Source.left = 50;
+	pPlayerImage->Source.right = 75;
 	vPlayerImage[0].push_back(pPlayerImage);
-	
+
 
 
 
 
 	// 이미지 부르기
 	//D3DXCreateTextureFromFileExW( _pd3dDevice, L"nemo80_160.png", 
-	D3DXCreateTextureFromFileExW( _pd3dDevice, L"player.png", 
-		D3DX_DEFAULT_NONPOW2 , D3DX_DEFAULT_NONPOW2 ,
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"player.png",
+		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture); 
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture);
 	_Player_texture[1] = PlayerImage.Texture;
 
 
 	// 위
-	
+
 	pPlayerImage = new Image;
 	*pPlayerImage = PlayerImage;
 	pPlayerImage->Source.left = 0;
-	pPlayerImage->Source.right = 50;
+	pPlayerImage->Source.right = 25;
 	vPlayerImage[1].push_back(pPlayerImage);
-	
+
 
 
 
@@ -529,19 +645,19 @@ VOID GameScene::initPlayer(VOID)
 
 	// 이미지 부르기
 	//D3DXCreateTextureFromFileExW( _pd3dDevice, L"nemo80_160.png", 
-	D3DXCreateTextureFromFileExW( _pd3dDevice, L"player.png", 
-		D3DX_DEFAULT_NONPOW2 , D3DX_DEFAULT_NONPOW2 ,
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"player.png",
+		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture); 
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture);
 	_Player_texture[2] = PlayerImage.Texture;
 
 
 	// 오
-	
+
 	pPlayerImage = new Image;
 	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 50;
-	pPlayerImage->Source.right = 95;
+	pPlayerImage->Source.left = 25;
+	pPlayerImage->Source.right = 50;
 	vPlayerImage[2].push_back(pPlayerImage);
 
 	// 이미지 부르기
@@ -556,10 +672,10 @@ VOID GameScene::initPlayer(VOID)
 
 	pPlayerImage = new Image;
 	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 150;
-	pPlayerImage->Source.right = 200;
+	pPlayerImage->Source.left = 75;
+	pPlayerImage->Source.right = 100;
 	vPlayerImage[3].push_back(pPlayerImage);
-	
+
 
 
 
@@ -567,38 +683,33 @@ VOID GameScene::initPlayer(VOID)
 
 	Property PlayerProperty;
 	ZeroMemory(&PlayerProperty, sizeof(Property));
-	PlayerProperty.Speed		= 500.0f;
-	PlayerProperty.HealthPoint	= 1000.0f;
-	PlayerProperty.ALive		= TRUE;
+	PlayerProperty.Speed = 200.0f;
+	PlayerProperty.HealthPoint = 10.0f;
+	PlayerProperty.ALive = TRUE;
 
 
 
 	// 데이터 적용
-	Character* pPlayer = NULL;
-	pPlayer = new Character;
-	pPlayer->setAnimation( &vPlayerImage );
-	pPlayer->selAnimation( 0 );
-	pPlayer->setProperty(&PlayerProperty);
-	pPlayer->setPosition( &D3DXVECTOR3(300.0f, 650.0f, .0f) );
-
-	_pPool->pushPool( pPlayer, 1 );
-	_Player = _pPool->New( POOL_Player );
-	_Player->playAni();
-
 	BoundBoxVec vBound;
 	BoundingBox* pBox = new BoundingBox;
-	pBox->LT.x = -20.5f;
-	pBox->LT.y = -23.0f;
-	pBox->RB.x = 20.5f;
-	pBox->RB.y = 23.0f;
+	pBox->LT.x = -5.5f;
+	pBox->LT.y = -5.0f;
+	pBox->RB.x = 5.5f;
+	pBox->RB.y = 5.0f;
 	vBound.push_back(pBox);
 
 	pPlayer->setBoundingBox(&vBound);
 
 
+	pPlayer->setAnimation(&vPlayerImage);
+	pPlayer->selAnimation(0);
+	pPlayer->setProperty(&PlayerProperty);
+	pPlayer->setPosition(&D3DXVECTOR3(300.0f, 650.0f, .0f));
+
 	_pPool->pushPool(pPlayer, 1);
 
-
+	_Player = _pPool->New(POOL_Player);
+	_Player->playAni();
 }
 
 
@@ -725,16 +836,16 @@ VOID GameScene::updateCollision(VOID)
 
 	// 충돌테스트를 한다. 
 	// 총알이 보이는 상태이고, 적이 살아있는 상태이면 충돌테스트를 한다.
-	_pPool->lockDelete(POOL_PlayerBullet);
-	_pPool->lockDelete(POOL_EnemyBullet);
+	_pPool->lockDelete(POOL_Player);
+	_pPool->lockDelete(POOL_Enemy1);
 
 	CharacterList::iterator itE;
 	CharacterList* plsitEnemy = NULL;
-	plsitEnemy = _pPool->getUseList(POOL_PlayerBullet);
+	plsitEnemy = _pPool->getUseList(POOL_Player);
 
 	CharacterList::iterator itB;
 	CharacterList* plistBullet = NULL;
-	plistBullet = _pPool->getUseList(POOL_EnemyBullet);
+	plistBullet = _pPool->getUseList(POOL_Enemy1);
 
 	for (itE=plsitEnemy->begin(); itE!=plsitEnemy->end(); ++itE)
 	{
@@ -745,8 +856,37 @@ VOID GameScene::updateCollision(VOID)
 	}
 
 
+	_pPool->unlockDelete(POOL_Enemy1);
+	_pPool->unlockDelete(POOL_Player);
+}
+
+VOID GameScene::updateCollision1(VOID)
+{
+
+	// 충돌테스트를 한다. 
+	// 총알이 보이는 상태이고, 적이 살아있는 상태이면 충돌테스트를 한다.
+	_pPool->lockDelete(POOL_Player);
+	_pPool->lockDelete(POOL_EnemyBullet);
+
+	CharacterList::iterator itE;
+	CharacterList* plsitEnemy = NULL;
+	plsitEnemy = _pPool->getUseList(POOL_Player);
+
+	CharacterList::iterator itB;
+	CharacterList* plistBullet = NULL;
+	plistBullet = _pPool->getUseList(POOL_EnemyBullet);
+
+	for (itE = plsitEnemy->begin(); itE != plsitEnemy->end(); ++itE)
+	{
+		for (itB = plistBullet->begin(); itB != plistBullet->end(); ++itB)
+		{
+			Collision(COL_BulletToEnemy, *itB, *itE);
+		}
+	}
+
+
 	_pPool->unlockDelete(POOL_EnemyBullet);
-	_pPool->unlockDelete(POOL_PlayerBullet);
+	_pPool->unlockDelete(POOL_Player);
 }
 
 
@@ -812,8 +952,10 @@ VOID GameScene::OnCOL_BulletToEnemy(Character* pBullet, Character* pEnemy)
 
 
 	// HP가 없으면, 삭제
-	
+	if (proEnemy.HealthPoint <= .0f)
+	{
 		_pPool->Delete(pEnemy);
+	}
 	
 
 	// 적의 능력 재설정

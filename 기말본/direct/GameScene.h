@@ -13,6 +13,7 @@ public:
 	VOID initBullet(VOID);
 	VOID initEnemyBullet(VOID);
 	VOID initEnemy(VOID);
+	VOID initEnemy1(VOID);
 	VOID initEnemy_Explosion(VOID);
 	VOID initPlayer(VOID);
 
@@ -21,6 +22,7 @@ public:
 	VOID UpdateBarrage(VOID);
 	VOID updateCharacter(VOID);
 	VOID updateCollision(VOID);
+	VOID updateCollision1(VOID);
 	VOID Collision(UINT uMsg, Character* Bullet, Character* Target);
 
 protected:
@@ -35,6 +37,7 @@ protected:
 	// 텍스쳐
 	LPDIRECT3DTEXTURE9	_EnemyBullet_texture;	// 적 총알
 	LPDIRECT3DTEXTURE9	_Enemy_texture;		// 적
+	LPDIRECT3DTEXTURE9	_Enemy_texture1;		// 적
 	LPDIRECT3DTEXTURE9	_EnemyExplosion_texture; // 적의폭팔
 	LPDIRECT3DTEXTURE9	_Bullet_texture;	// 플레이어의 총알
 
